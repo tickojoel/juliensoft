@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="100%" height="100%" fill="#f3f4f6"/>
+  <rect x="60" y="60" width="1080" height="1080" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <g transform="translate(120,120)">
+    <rect x="0" y="0" width="960" height="560" fill="#fff" stroke="#d1d5db"/>
+    <text x="480" y="300" font-size="48" font-family="Arial, Helvetica, sans-serif" fill="#111827" text-anchor="middle">Set 2 Piezas - Blanco</text>
+    <text x="480" y="360" font-size="28" fill="#6b7280" text-anchor="middle">SKU: sm25031222491797325</text>
+  </g>
+  <g transform="translate(120,720)">
+    <rect x="0" y="0" width="420" height="300" fill="#f8fafc" stroke="#e5e7eb"/>
+    <rect x="500" y="0" width="420" height="300" fill="#f8fafc" stroke="#e5e7eb"/>
+    <text x="210" y="160" font-size="22" fill="#374151" text-anchor="middle">Camiseta</text>
+    <text x="710" y="160" font-size="22" fill="#374151" text-anchor="middle">Pantalones Cortos</text>
+  </g>
+</svg>
