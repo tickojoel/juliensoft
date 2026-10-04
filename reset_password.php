@@ -2,6 +2,9 @@
 session_start();
 require_once 'config/database.php';
 
+$database = new Database();
+$db = $database->getConnection();
+
 $error = '';
 $success = '';
 
@@ -18,20 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = 'Las contraseñas no coinciden';
     } else {
         // Verificar el token
-        $stmt = $mysqli->prepare("SELECT id FROM usuarios WHERE reset_token = ? AND reset_expires > NOW()");
-        $stmt->bind_param("s", $token);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt = $db->prepare("SELECT id FROM usuarios WHERE reset_token = ? AND reset_expires > NOW()");
+        $stmt->execute([$token]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($result->num_rows > 0) {
-            $user = $result->fetch_assoc();
+        if ($user) {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
             // Actualizar la contraseña y limpiar el token
-            $stmt = $mysqli->prepare("UPDATE usuarios SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?");
-            $stmt->bind_param("si", $hashed_password, $user['id']);
+            $stmt = $db->prepare("UPDATE usuarios SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?");
             
-            if ($stmt->execute()) {
+            if ($stmt->execute([$hashed_password, $user['id']])) {
                 $success = 'Tu contraseña ha sido restablecida correctamente. Ahora puedes iniciar sesión.';
                 $show_form = false;
             } else {
@@ -50,12 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Verificar si el token es válido
-    $stmt = $mysqli->prepare("SELECT id FROM usuarios WHERE reset_token = ? AND reset_expires > NOW()");
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $db->prepare("SELECT id FROM usuarios WHERE reset_token = ? AND reset_expires > NOW()");
+    $stmt->execute([$token]);
     
-    if ($result->num_rows === 0) {
+    if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
         $error = 'El enlace de recuperación es inválido o ha expirado.';
         $show_form = false;
     } else {

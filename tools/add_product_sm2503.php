@@ -1,4 +1,8 @@
 <?php
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Solo disponible desde la línea de comandos.');
+}
 // Script para añadir un producto de ejemplo (SKU: sm25031222491797325)
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../classes/Product.php';

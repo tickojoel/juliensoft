@@ -165,7 +165,7 @@ try {
                         <i class="fas fa-shopping-cart text-xl"></i>
                         <span id="cart-count"
                             class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                            <?php echo count($_SESSION['cart']); ?>
+                            <?php echo count($_SESSION['cart'] ?? []); ?>
                         </span>
                     </button>
                     <a href="admin/" class="text-gray-600 hover:text-purple-600"><i class="fas fa-user"></i></a>
@@ -375,7 +375,7 @@ try {
     </script>
     <script>
         // Variables globales
-        let cart = <?php echo json_encode($_SESSION['cart']); ?>;
+        let cart = <?php echo json_encode($_SESSION['cart'] ?? []); ?>;
 
         // Función para alternar el modal del carrito
         function toggleCart() {

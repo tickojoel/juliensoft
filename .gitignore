@@ -1,0 +1,7 @@
+# Configuración local con credenciales (no subir)
+config/*.local.php
+
+# Logs y archivos generados
+storage/*
+!storage/.gitkeep
+*.log

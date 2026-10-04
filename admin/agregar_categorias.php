@@ -1,27 +1,12 @@
 <?php
-// config.php - Configuración de la base de datos
-class Database {
-    private $host = 'localhost';
-    private $db_name = 'beautystore'; // Cambia por el nombre de tu base de datos
-    private $username = 'root';           // Usuario por defecto de XAMPP
-    private $password = '';               // Contraseña vacía por defecto en XAMPP
-    private $conn;
+session_start();
+require_once '../config/database.php';
 
-    public function getConnection() {
-        $this->conn = null;
-        try {
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, 
-                                $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->exec("set names utf8");
-        } catch(PDOException $exception) {
-            echo "Error de conexión: " . $exception->getMessage();
-        }
-        return $this->conn;
-    }
+if (!isset($_SESSION['admin_logged_in'])) {
+    header('Location: login.php');
+    exit;
 }
 
-// CategoryManager.php - Clase para manejar las categorías
 class CategoryManager {
     private $conn;
     private $table_name = "categories";

@@ -1,4 +1,8 @@
 <?php
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Solo disponible desde la línea de comandos.');
+}
 // Script de prueba SMTP para diagnosticar autenticación con PHPMailer
 // Ejecutar desde navegador o consola: php tools/test_smtp.php
 
