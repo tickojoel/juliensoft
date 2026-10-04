@@ -949,8 +949,12 @@ if (!isset($_SESSION['cart'])) {
             }
         }
 
+        // Evita que renders anteriores (peticiones aún en curso) dupliquen ítems
+        let cartRenderId = 0;
+
         // Función para actualizar la visualización del carrito
         function updateCartDisplay() {
+            const renderId = ++cartRenderId;
             const cartItems = document.getElementById('cart-items');
             const cartTotal = document.getElementById('cart-total');
             const checkoutButton = document.getElementById('checkout-button');
@@ -985,12 +989,14 @@ if (!isset($_SESSION['cart'])) {
                 fetch(`ajax/get_product.php?id=${productId}`)
                     .then(response => response.json())
                     .then(product => {
+                        if (renderId !== cartRenderId) return;
                         const subtotal = product.price * item.quantity;
                         total += subtotal;
                         
                         const productElement = document.createElement('div');
                         productElement.className = 'py-4 border-b';
                         productElement.id = `cart-item-${i}`;
+                        productElement.dataset.subtotal = subtotal;
                         
                         // Construir el HTML para las opciones
                         let optionsHtml = '';
@@ -1056,11 +1062,8 @@ if (!isset($_SESSION['cart'])) {
             let total = 0;
             
             // Calcular total sumando los precios de los productos visibles
-            document.querySelectorAll('#cart-items > div').forEach(item => {
-                const priceText = item.querySelector('.text-sm.text-gray-500').textContent.replace('$', '').replace(/\./g, '');
-                const quantity = parseInt(item.querySelector('.mx-2').textContent);
-                const price = parseFloat(priceText);
-                total += price * quantity;
+            document.querySelectorAll('#cart-items > div[data-subtotal]').forEach(item => {
+                total += parseFloat(item.dataset.subtotal);
             });
             
             cartTotal.textContent = `$${total.toLocaleString()}`;

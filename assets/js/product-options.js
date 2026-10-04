@@ -10,7 +10,7 @@ function showProductOptions(productId, productName, isShoe = false) {
         modal.innerHTML = `
             <div class="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div class="p-4 border-b">
-                    <h3 class="text-lg font-semibold">Opciones de ${productName}</h3>
+                    <h3 id="product-options-title" class="text-lg font-semibold"></h3>
                 </div>
                 <div class="p-4 space-y-4">
                     <div id="size-options">
@@ -42,7 +42,7 @@ function showProductOptions(productId, productName, isShoe = false) {
                         </div>
                     </div>
                     
-                    <div id="shoe-size-container" class="${isShoe ? '' : 'hidden'}">
+                    <div id="shoe-size-container" class="hidden">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Número</label>
                         <div class="grid grid-cols-6 gap-2">
                             ${Array.from({ length: 10 }, (_, i) => 35 + i).map(size => `
@@ -60,7 +60,7 @@ function showProductOptions(productId, productName, isShoe = false) {
                         <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad</label>
                         <div class="flex items-center">
                             <button type="button" 
-                                onclick="updateQuantity(-1)" 
+                                onclick="updateOptionsQuantity(-1)" 
                                 class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-l">
                                 -
                             </button>
@@ -70,7 +70,7 @@ function showProductOptions(productId, productName, isShoe = false) {
                                 min="1" 
                                 class="w-16 text-center border-t border-b border-gray-300 py-1">
                             <button type="button" 
-                                onclick="updateQuantity(1)" 
+                                onclick="updateOptionsQuantity(1)" 
                                 class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-r">
                                 +
                             </button>
@@ -85,7 +85,7 @@ function showProductOptions(productId, productName, isShoe = false) {
                     </button>
                     <button type="button" 
                         id="add-to-cart-btn" 
-                        onclick="addToCartWithOptions(${productId})" 
+                        onclick="addToCartWithOptions(this.dataset.productId)" 
                         class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                         disabled>
                         Agregar al carrito
@@ -101,7 +101,10 @@ function showProductOptions(productId, productName, isShoe = false) {
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
 
-    // Actualizar el botón de agregar al carrito
+    // El modal se reutiliza: actualizar los datos del producto actual
+    document.getElementById('product-options-title').textContent = `Opciones de ${productName}`;
+    document.getElementById('shoe-size-container').classList.toggle('hidden', !isShoe);
+
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     if (addToCartBtn) {
         addToCartBtn.setAttribute('data-product-id', productId);
@@ -123,13 +126,15 @@ function hideProductOptions() {
 
 // Función para seleccionar una opción (talla, color, número)
 function selectOption(type, value) {
+    const optionClass = type === 'shoeSize' ? 'shoe-size-option' : `${type}-option`;
+
     // Remover la clase de selección de todos los botones del mismo tipo
-    document.querySelectorAll(`.${type}-option`).forEach(btn => {
+    document.querySelectorAll(`.${optionClass}`).forEach(btn => {
         btn.classList.remove('ring-2', 'ring-blue-500', 'border-blue-500');
     });
 
     // Agregar la clase de selección al botón clickeado
-    const clickedBtn = document.querySelector(`.${type}-option[data-value="${value}"]`);
+    const clickedBtn = document.querySelector(`.${optionClass}[data-value="${value}"]`);
     if (clickedBtn) {
         clickedBtn.classList.add('ring-2', 'ring-blue-500', 'border-blue-500');
     }
@@ -139,7 +144,7 @@ function selectOption(type, value) {
 }
 
 // Función para actualizar la cantidad
-function updateQuantity(change) {
+function updateOptionsQuantity(change) {
     const quantityInput = document.getElementById('quantity');
     if (quantityInput) {
         let newValue = parseInt(quantityInput.value) + change;
@@ -224,7 +229,7 @@ function addToCartWithOptions(productId) {
     hideProductOptions();
 
     // Llamar a la función original de agregar al carrito
-    addToCart(productId, parseInt(quantity), options);
+    addToCart(parseInt(productId), parseInt(quantity), options);
 }
 
 // Función para manejar clics fuera del modal

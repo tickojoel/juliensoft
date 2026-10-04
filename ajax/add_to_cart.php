@@ -51,80 +51,53 @@ try {
     }
 
     // Inicializar el carrito si no existe
-    if (!isset($_SESSION['cart'])) {
+    if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
     }
 
-    // Verificar si el producto con las mismas opciones ya está en el carrito
-    $found = false;
-    
-    // Asegurarse de que $options sea un array
-    if (!is_array($options)) {
-        $options = [];
+    // Normalizar las opciones: solo claves válidas, no vacías y en orden consistente
+    $validOptions = [];
+    foreach (['size', 'color', 'shoeSize'] as $key) {
+        if (isset($options[$key]) && $options[$key] !== '') {
+            $validOptions[$key] = (string)$options[$key];
+        }
     }
-    
-    // Ordenar las opciones para comparación consistente
-    ksort($options);
-    
-    foreach ($_SESSION['cart'] as &$item) {
+    ksort($validOptions);
+    $options = $validOptions;
+
+    // Buscar si el producto con las mismas opciones ya está en el carrito
+    $existingIndex = null;
+    foreach ($_SESSION['cart'] as $index => $item) {
         $itemOptions = isset($item['options']) && is_array($item['options']) ? $item['options'] : [];
         ksort($itemOptions);
-        
-        // Verificar si es el mismo producto con las mismas opciones
+
         if ($item['product_id'] == $productId && $itemOptions === $options) {
-            $item['quantity'] += $quantity;
-            $found = true;
+            $existingIndex = $index;
             break;
         }
     }
 
-    // Si el producto no está en el carrito o tiene opciones diferentes, agregarlo como nuevo ítem
-    if (!$found) {
-        // Asegurarse de que solo guardamos las opciones válidas (talla, color, shoeSize)
-        $validOptions = [];
-        $validKeys = ['size', 'color', 'shoeSize'];
-        
-        foreach ($validKeys as $key) {
-            if (isset($options[$key]) && !empty($options[$key])) {
-                $validOptions[$key] = $options[$key];
-            }
-        }
-        
-        // Agregar el ítem al carrito
+    // Verificar stock disponible antes de modificar el carrito
+    $currentQuantity = $existingIndex !== null ? (int)$_SESSION['cart'][$existingIndex]['quantity'] : 0;
+    if ($currentQuantity + $quantity > $productData['stock']) {
+        throw new Exception('Stock insuficiente. Solo quedan ' . $productData['stock'] . ' unidades disponibles.');
+    }
+
+    $found = $existingIndex !== null;
+    if ($found) {
+        $_SESSION['cart'][$existingIndex]['quantity'] = $currentQuantity + $quantity;
+    } else {
         $newItem = [
             'product_id' => $productId,
             'quantity' => $quantity,
             'added_at' => time()
         ];
-        
-        // Solo agregar opciones si hay alguna
-        if (!empty($validOptions)) {
-            $newItem['options'] = $validOptions;
-        }
-        
-        $_SESSION['cart'][] = $newItem;
-        $found = true; // Para el mensaje de éxito
-    }
 
-    // Verificar stock disponible
-    $totalQuantity = $quantity;
-    
-    // Sumar la cantidad de productos idénticos ya en el carrito
-    if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
-        foreach ($_SESSION['cart'] as $item) {
-            if ($item['product_id'] == $productId) {
-                $itemOptions = isset($item['options']) && is_array($item['options']) ? $item['options'] : [];
-                
-                // Si las opciones coinciden, sumar la cantidad
-                if ($itemOptions === $options) {
-                    $totalQuantity += $item['quantity'];
-                }
-            }
+        if (!empty($options)) {
+            $newItem['options'] = $options;
         }
-    }
-    
-    if ($totalQuantity > $productData['stock']) {
-        throw new Exception('Stock insuficiente. Solo quedan ' . $productData['stock'] . ' unidades disponibles.');
+
+        $_SESSION['cart'][] = $newItem;
     }
 
     // Preparar datos para la respuesta
