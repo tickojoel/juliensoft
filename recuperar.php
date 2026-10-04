@@ -75,7 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $mail->isHTML(true);
                         $mail->Subject = 'Recuperación de Contraseña';
                         
-                        $reset_link = "http://" . $_SERVER['HTTP_HOST'] . "/Tienda_kimberly/reset_password.php?token=" . $token;
+                        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                        $base_path = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+                        $reset_link = $scheme . "://" . $_SERVER['HTTP_HOST'] . $base_path . "/reset_password.php?token=" . urlencode($token);
                         
                         $mail->Body = "
                             <p>Hola,</p>

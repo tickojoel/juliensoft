@@ -1,13 +1,15 @@
 <?php
 session_start();
-require_once '../config/database.php';
+require_once '../config/admin.php';
 
 if (isset($_POST['login'])) {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    
-    // Validación simple (en producción usaría password_hash y password_verify)
-    if ($username === 'Joel Julien' && $password === 'Jojulien576') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    if ($ADMIN['username'] === '' || $ADMIN['password_hash'] === '') {
+        $error = "El acceso de administrador no está configurado (ver config/admin.local.example.php)";
+    } elseif (hash_equals($ADMIN['username'], $username) && password_verify($password, $ADMIN['password_hash'])) {
+        session_regenerate_id(true);
         $_SESSION['admin_logged_in'] = true;
         header('Location: index.php');
         exit;
