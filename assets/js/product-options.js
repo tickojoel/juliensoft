@@ -126,13 +126,15 @@ function hideProductOptions() {
 
 // Función para seleccionar una opción (talla, color, número)
 function selectOption(type, value) {
+    const optionClass = type === 'shoeSize' ? 'shoe-size-option' : `${type}-option`;
+
     // Remover la clase de selección de todos los botones del mismo tipo
-    document.querySelectorAll(`.${type}-option`).forEach(btn => {
+    document.querySelectorAll(`.${optionClass}`).forEach(btn => {
         btn.classList.remove('ring-2', 'ring-blue-500', 'border-blue-500');
     });
 
     // Agregar la clase de selección al botón clickeado
-    const clickedBtn = document.querySelector(`.${type}-option[data-value="${value}"]`);
+    const clickedBtn = document.querySelector(`.${optionClass}[data-value="${value}"]`);
     if (clickedBtn) {
         clickedBtn.classList.add('ring-2', 'ring-blue-500', 'border-blue-500');
     }
