@@ -949,8 +949,12 @@ if (!isset($_SESSION['cart'])) {
             }
         }
 
+        // Evita que renders anteriores (peticiones aún en curso) dupliquen ítems
+        let cartRenderId = 0;
+
         // Función para actualizar la visualización del carrito
         function updateCartDisplay() {
+            const renderId = ++cartRenderId;
             const cartItems = document.getElementById('cart-items');
             const cartTotal = document.getElementById('cart-total');
             const checkoutButton = document.getElementById('checkout-button');
@@ -985,6 +989,7 @@ if (!isset($_SESSION['cart'])) {
                 fetch(`ajax/get_product.php?id=${productId}`)
                     .then(response => response.json())
                     .then(product => {
+                        if (renderId !== cartRenderId) return;
                         const subtotal = product.price * item.quantity;
                         total += subtotal;
                         
